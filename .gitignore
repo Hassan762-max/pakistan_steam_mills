@@ -29,9 +29,26 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+build-out.txt
+tsc-out.txt
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files — keep example template
+.env
+.env.*
+!.env.example
+
+# local secrets / data
+credentials.txt
+*.db
+*.db-journal
+prisma/*.db
+prisma/*.db-journal
+
+# local agent tooling (not part of the app)
+.agents/
+.claude/
+.windsurf/
+skills-lock.json
 
 # vercel
 .vercel
@@ -39,3 +56,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/src/generated/prisma

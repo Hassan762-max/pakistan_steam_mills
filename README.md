@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pakistan Steel Mills Management System
 
-## Getting Started
+Enterprise management platform for **Pakistan Steel Mills** — production, inventory, HR, procurement, maintenance, quality, safety, finance, workflows, and administration.
 
-First, run the development server:
+## Stack
+
+| Layer | Choice |
+|---|---|
+| App framework | Next.js 16 (App Router) + TypeScript |
+| UI | Tailwind CSS 4 + Radix primitives + custom design system |
+| Data | Prisma 6 + SQLite (dev) — PostgreSQL-ready schema |
+| Auth | Custom secure session auth (httpOnly cookies, hashed tokens) |
+| Authorization | Permission-based RBAC (`module.resource.action`) |
+| Validation | Zod |
+| Tables / data | TanStack Table + TanStack Query |
+| Charts | Recharts |
+
+## Quick start
 
 ```bash
+npm install
+npx prisma db push
+npm run db:seed
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Demo credentials
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Password for all seeded users: `Password@123`
 
-## Learn More
+| Account | Role |
+|---|---|
+| `admin@psm.gov.pk` / `admin` | Super Administrator |
+| `plant.manager@psm.gov.pk` | Plant Manager |
+| `hr.manager@psm.gov.pk` | HR Manager |
+| `finance.manager@psm.gov.pk` | Finance Manager |
+| `procurement@psm.gov.pk` | Procurement Manager |
+| `production@psm.gov.pk` | Production Manager |
+| `employee@psm.gov.pk` | Employee |
+| `auditor@psm.gov.pk` | Auditor |
 
-To learn more about Next.js, take a look at the following resources:
+## Architecture
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/(auth)/          Auth pages (login, signup, reset, verify…)
+  app/(app)/           Protected enterprise modules
+  components/ui/       Design system
+  components/layout/   Shell, sidebar, command palette
+  server/auth/         Sessions, passwords, lockout
+  server/authorization/ Permission resolution
+  server/services/     Domain business logic
+  server/actions/      Server actions (mutations)
+  server/audit/        Tamper-resistant audit logging
+  lib/permissions.ts   Permission catalog + system roles
+prisma/                Schema + seed
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Authorization is enforced in **server services** (never UI-only). Navigation is filtered by effective permissions.
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Script | Purpose |
+|---|---|
+| `npm run dev` | Development server |
+| `npm run build` | Production build |
+| `npm run db:push` | Sync schema |
+| `npm run db:seed` | Seed demo data |
+| `npm run db:reset` | Reset DB + seed |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Security highlights
+
+- HttpOnly session cookies, hashed session tokens
+- Password strength policy + bcrypt hashing
+- Failed login tracking and temporary account lockout
+- Email verification / password reset token flow
+- Logout / logout-all-devices via session revocation
+- Integrity-hashed audit trail
+- Permission checks on every sensitive service method
+- Mass-assignment avoided via Zod-validated inputs
+
+## Production notes
+
+- Set a strong `AUTH_SECRET` in `.env`
+- Switch `DATABASE_URL` to PostgreSQL for production deployments
+- Configure real email delivery for verification / reset tokens (demo currently returns tokens in-app for local testing)
+- Place file uploads behind authenticated, scanned storage with access control
